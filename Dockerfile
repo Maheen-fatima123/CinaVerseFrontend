@@ -1,21 +1,18 @@
-# Build stage
-FROM node:20-alpine AS builder
+# Stage 1: Build the Vite app
+FROM node:20-alpine AS build
 
 WORKDIR /app
 
-# Support monorepo structure
-COPY cinaverse/package*.json ./
-
+COPY package*.json ./
 RUN npm install
 
-COPY cinaverse/ .
-
+COPY . .
 RUN npm run build
 
-# Production stage
+# Stage 2: Serve using Nginx
 FROM nginx:stable-alpine
 
-COPY --from=builder /app/dist /usr/share/nginx/html
+COPY --from=build /app/dist /usr/share/nginx/html
 
 EXPOSE 80
 
